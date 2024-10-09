@@ -49,7 +49,7 @@ void statsDisplay(struct UnsavedData *data)
 
 void randEvnt(struct UnsavedData *data)
 {
-    int eventType = rand() % 6;   // Update to allow for the new event type
+    int eventType = rand() % 7;   // Update to allow for the new event type
     char eventMsg[MAX_EVENT_LEN]; // Ensure the buffer is large enough to hold the message
 
     switch (eventType)
@@ -69,7 +69,7 @@ void randEvnt(struct UnsavedData *data)
     }
     case 2:
     {
-        int newColonists = rand() % 9;   // Randomly add 0 to 8 colonists
+        int newColonists = rand()%9+3;   // Randomly add 0 to 8 colonists
         data->colonists += newColonists; // Increase colonist count
         int familyType = rand() % 8;     // Random family type
         char familyRace[15];             // Buffer for family race
@@ -107,7 +107,7 @@ void randEvnt(struct UnsavedData *data)
     }
     case 3:
     {
-        snprintf(eventMsg, sizeof(eventMsg), "Nothing unusual happened.");
+        snprintf(eventMsg, sizeof(eventMsg), "Nothing unusual happened. You've been spared by nature.");
         break;
     }
     case 4:
@@ -120,19 +120,28 @@ void randEvnt(struct UnsavedData *data)
         }
         else
         {
-            snprintf(eventMsg, sizeof(eventMsg), "Your colonists are hungry, but you don't have enough food to distribute, %d die.", data->colonists-=rand()%23);
+            int killedOff = rand() % 23;
+             data->colonists -= killedOff;
+            snprintf(eventMsg, sizeof(eventMsg), "Your colonists are hungry, but you don't have enough food to distribute, %d die.", killedOff);
         }
         break;
     }
     case 5:
     {
-        int newHouses = rand()%5;
+        int newHouses = rand() % 6 + 1;
         int foodGift = newHouses>3 ? 24 : 18;
         snprintf(eventMsg, sizeof(eventMsg), "A good samaritan colonist decides to build %d houses for you, you thank him with %d food.", newHouses, foodGift);
         break;
     }
+    case 6:
+        int gatheredWood = rand() % 31;
+        int gatheredFood = rand() % 21;
+        data->wood += gatheredWood;
+        data->food += gatheredFood;
+        snprintf(eventMsg, sizeof(eventMsg), "A handful of your colonists decided to gather for the colony, bringing back %d wood and %d food", gatheredWood, gatheredFood);
+        break;
     default:
-        snprintf(eventMsg, sizeof(eventMsg), "Unknown event.");
+        snprintf(eventMsg, sizeof(eventMsg), "Something happened, but nothing was affected... weird.");
         break;
     }
 
@@ -141,7 +150,7 @@ void randEvnt(struct UnsavedData *data)
 
 void autoRandEvent(struct UnsavedData *data)
 {
-    printf("Press 'q' to stop the random events.\n");
+    printf("Press 'q' to stop nature.\n");
 
     while (1)
     {
@@ -185,6 +194,37 @@ void buildTownhouse(struct UnsavedData *data)
     else
     {
         printf("You don't have enough wood.\n");
+    }
+}
+
+void builder(int buildType, struct UnsavedData *data)
+{
+    printf("Press 'q' to stop the builder.\n");
+
+    while (1)
+    {
+        if (buildType == 1)
+        {
+            buildHouse(data);
+            Sleep(5000);
+        } else if (buildType == 2)
+        {
+            buildTownhouse(data);
+            Sleep(10000);
+        } else
+        {
+            perror("Internal Game Error: buildType is neither 1 or 2.");
+            break;
+        }
+        // Check for keyboard input
+        if (_kbhit())
+        {
+            char ch = _getch(); // Get the pressed key
+            if (ch == 'q')
+            {
+                break; // Exit the loop if 'q' is pressed
+            }
+        }
     }
 }
 
@@ -305,7 +345,7 @@ int main()
         fgets(command, sizeof(command), stdin);
         command[strcspn(command, "\n")] = 0; // Remove newline
 
-        if (strcmp(command, "build_house") == 0)
+        if (strcmp(command, "build house") == 0)
         {
             if (difftime(currentTime, lastBuiltHouse) >= COOLDOWN_BUILD_HOUSE)
             {
@@ -321,7 +361,7 @@ int main()
                 }
             }
         }
-        else if (strcmp(command, "build_townhouse") == 0)
+        else if (strcmp(command, "build townhouse") == 0)
         {
             if (difftime(currentTime, lastBuiltTownhouse) >= COOLDOWN_BUILD_TOWNHOUSE)
             {
@@ -336,6 +376,14 @@ int main()
                     printf("You must wait %d seconds before building another townhouse.\n", remainingTime);
                 }
             }
+        }
+        else if (strcmp(command, "builder house") == 0)
+        {
+            builder(1, &data);
+        }
+        else if (strcmp(command, "builder townhouse") == 0)
+        {
+            builder(2, &data);
         }
         else if (strcmp(command, "gather") == 0)
         {
@@ -373,7 +421,7 @@ int main()
                 }
             }
         }
-        else if (strcmp(command, "autoevent") == 0)
+        else if (strcmp(command, "let nature") == 0)
         {
             autoRandEvent(&data);
         }
@@ -387,6 +435,11 @@ int main()
             printf("Goodbye!\n");
             break;
         }
+        else if (strcmp(command, "help") == 0 || strcmp(command, "?") == 0)
+        {
+            printf("You ask your assistant, Ferdiand, how \"play this game\"\n");
+            printf("He replies:\n\tbuild house\tbuild one house\n\tbuild townhouse\tbuild one townhouse\n\tgather\t\tgather wood and food\n\trandevent\tlet nature do one event\n\tlet nature\tlet nature run its course until you press \"q\"\n\tsave\t\tsave game\n\tquit\t\tquit\n");
+        }
         else
         {
             printf("Unknown command.\n");
@@ -395,3 +448,4 @@ int main()
 
     return 0;
 }
+// 450 lines of bullshit
