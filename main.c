@@ -49,7 +49,7 @@ void statsDisplay(struct UnsavedData *data)
 
 void randEvnt(struct UnsavedData *data)
 {
-    int eventType = rand() % 7;   // Update to allow for the new event type
+    int eventType = rand() % 8;   // Update to allow for the new event type
     char eventMsg[MAX_EVENT_LEN]; // Ensure the buffer is large enough to hold the message
 
     switch (eventType)
@@ -139,6 +139,22 @@ void randEvnt(struct UnsavedData *data)
         data->wood += gatheredWood;
         data->food += gatheredFood;
         snprintf(eventMsg, sizeof(eventMsg), "A handful of your colonists decided to gather for the colony, bringing back %d wood and %d food", gatheredWood, gatheredFood);
+        break;
+    case 7:
+        int coinToss = rand()% 2 + 1;
+        if (coinToss == 1)
+        {
+            int warLoss = rand()%data->colonists/4;
+            snprintf(eventMsg, sizeof(eventMsg), "A group of Indians come to raid, you resist and win, losing %d colonist lives", warLoss);
+            data->colonists -= warLoss;
+        } else if (coinToss == 2)
+        {
+            int warLoss = rand()%data->colonists/2;
+            snprintf(eventMsg, sizeof(eventMsg), "A group of Indians come to raid, you resist but lose, losing %d colonist lives and half of your resources", warLoss);
+            data->colonists -= warLoss;
+            data->food -= data->food/2;
+            data->wood -= data->wood/2;
+        }
         break;
     default:
         snprintf(eventMsg, sizeof(eventMsg), "Something happened, but nothing was affected... weird.");
