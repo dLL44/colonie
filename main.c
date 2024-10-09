@@ -99,7 +99,7 @@ void randEvnt(struct UnsavedData *data)
             break;
         default:
             strcpy(familyRace, "Nordic");
-            break; // Fallback if no match
+            break; // Fallback to "Nordic" if no match
         }
 
         snprintf(eventMsg, sizeof(eventMsg), "A(n) %s family came to your colony, saying (translated by a %s colonist) that the colony of %s was heard to be great. +%d colonists.", familyRace, familyRace, data->colonyName, newColonists);
