@@ -1,2 +1,2 @@
 @echo off
-gcc main.c ./include/cJSON/*.o -o main -I./include/cJSON
+gcc main.c ./include/cJSON/*.o -o main -I./include/cJSON -I./include/

@@ -1,10 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "cJSON.h"
 #include <windows.h>
 #include <time.h>
 #include <conio.h>
+#include "cJSON.h"
+#include "color.h"
+
+// colonies
+//  made by dLL44
+//  gnu license
 
 #define MAX_NAME_LEN 50
 #define MAX_EVENT_LEN 150
@@ -36,8 +41,14 @@ int maxColonists(struct UnsavedData *data)
     return (data->houses * 6) + (data->townhouses * 16);
 }
 
+void cls()
+{
+    system("cls");
+}
+
 void statsDisplay(struct UnsavedData *data)
 {
+    setColor(CCOLOR_YELLOW);
     printf("\n--- The colony of %s ---\n", data->colonyName);
     printf("\tColonists: %d out of %d max\n", data->colonists, maxColonists(data));
     printf("\tWood: %d\n", data->wood);
@@ -45,6 +56,7 @@ void statsDisplay(struct UnsavedData *data)
     printf("\tHousing Total: %d\n", data->houses + data->townhouses);
     printf("\tRegular Houses: %d\n", data->houses);
     printf("\tTownhouses: %d\n", data->townhouses);
+    setColor(CCOLOR_GREEN);
 }
 
 void randEvnt(struct UnsavedData *data)
@@ -58,12 +70,14 @@ void randEvnt(struct UnsavedData *data)
     {
         int destroyedHouses = rand() % (data->houses / 2 + 1); // Ensure it's valid
         data->houses -= destroyedHouses;
+        setColor(CCOLOR_RED);
         snprintf(eventMsg, sizeof(eventMsg), "A storm came in, destroying %d of your houses.", destroyedHouses);
         break;
     }
     case 1:
     {
         data->food += 50;
+        setColor(CCOLOR_GREEN);
         snprintf(eventMsg, sizeof(eventMsg), "One of your colonists pointed out a cache of food, possibly from an old colony.");
         break;
     }
@@ -101,12 +115,13 @@ void randEvnt(struct UnsavedData *data)
             strcpy(familyRace, "Nordic");
             break; // Fallback to "Nordic" if no match
         }
-
+        setColor(CCOLOR_GREEN);
         snprintf(eventMsg, sizeof(eventMsg), "A(n) %s family came to your colony, saying (translated by a %s colonist) that the colony of %s was heard to be great. +%d colonists.", familyRace, familyRace, data->colonyName, newColonists);
         break;
     }
     case 3:
     {
+        setColor(CCOLOR_YELLOW);
         snprintf(eventMsg, sizeof(eventMsg), "Nothing unusual happened. You've been spared by nature.");
         break;
     }
@@ -115,13 +130,15 @@ void randEvnt(struct UnsavedData *data)
         int foodDistributed = rand() % (data->colonists / 2 + 1); // Randomly distribute up to half the colonists' count
         if (data->food >= foodDistributed)
         {
+            setColor(CCOLOR_GREEN);
             data->food -= foodDistributed; // Deduct the food distributed
             snprintf(eventMsg, sizeof(eventMsg), "Your colonists are hungry, you distribute %d food.", foodDistributed);
         }
         else
         {
             int killedOff = rand() % 23;
-             data->colonists -= killedOff;
+            data->colonists -= killedOff;
+            setColor(CCOLOR_RED);
             snprintf(eventMsg, sizeof(eventMsg), "Your colonists are hungry, but you don't have enough food to distribute, %d die.", killedOff);
         }
         break;
@@ -130,6 +147,7 @@ void randEvnt(struct UnsavedData *data)
     {
         int newHouses = rand() % 6 + 1;
         int foodGift = newHouses>3 ? 24 : 18;
+        setColor(CCOLOR_GREEN);
         snprintf(eventMsg, sizeof(eventMsg), "A good samaritan colonist decides to build %d houses for you, you thank him with %d food.", newHouses, foodGift);
         break;
     }
@@ -138,6 +156,7 @@ void randEvnt(struct UnsavedData *data)
         int gatheredFood = rand() % 21;
         data->wood += gatheredWood;
         data->food += gatheredFood;
+        setColor(CCOLOR_GREEN);
         snprintf(eventMsg, sizeof(eventMsg), "A handful of your colonists decided to gather for the colony, bringing back %d wood and %d food", gatheredWood, gatheredFood);
         break;
     case 7:
@@ -145,11 +164,13 @@ void randEvnt(struct UnsavedData *data)
         if (coinToss == 1)
         {
             int warLoss = rand()%data->colonists/4;
+            setColor(CCOLOR_YELLOW);
             snprintf(eventMsg, sizeof(eventMsg), "A group of Indians come to raid, you resist and win, losing %d colonist lives", warLoss);
             data->colonists -= warLoss;
         } else if (coinToss == 2)
         {
             int warLoss = rand()%data->colonists/2;
+            setColor(CCOLOR_RED);
             snprintf(eventMsg, sizeof(eventMsg), "A group of Indians come to raid, you resist but lose, losing %d colonist lives and half of your resources", warLoss);
             data->colonists -= warLoss;
             data->food -= data->food/2;
@@ -157,11 +178,13 @@ void randEvnt(struct UnsavedData *data)
         }
         break;
     default:
+        setColor(CCOLOR_MAGENTA);
         snprintf(eventMsg, sizeof(eventMsg), "Something happened, but nothing was affected... weird.");
         break;
     }
 
     printf("\n** RANDOM EVENT: %s **\n", eventMsg);
+    setColor(CCOLOR_RESET);
 }
 
 void autoRandEvent(struct UnsavedData *data)
@@ -191,11 +214,15 @@ void buildHouse(struct UnsavedData *data)
     {
         data->houses++;
         data->wood -= 10;
+        setColor(CCOLOR_YELLOW);
         printf("You built one house, you now have %d.\n", data->houses);
+        setColor(CCOLOR_GREEN);
     }
     else
     {
+        setColor(CCOLOR_RED);
         printf("You don't have enough wood.\n");
+        setColor(CCOLOR_GREEN);
     }
 }
 
@@ -205,11 +232,15 @@ void buildTownhouse(struct UnsavedData *data)
     {
         data->townhouses++;
         data->wood -= 20;
+        setColor(CCOLOR_YELLOW);
         printf("You built one townhouse, you now have %d.\n", data->townhouses);
+        setColor(CCOLOR_GREEN);
     }
     else
     {
+        setColor(CCOLOR_RED);
         printf("You don't have enough wood.\n");
+        setColor(CCOLOR_GREEN);
     }
 }
 
@@ -229,7 +260,9 @@ void builder(int buildType, struct UnsavedData *data)
             Sleep(10000);
         } else
         {
+            setColor(CCOLOR_RED);
             perror("Internal Game Error: buildType is neither 1 or 2.");
+            setColor(CCOLOR_GREEN);
             break;
         }
         // Check for keyboard input
@@ -325,6 +358,7 @@ int main()
     // Load game data if available
     loadGame(&data);
 
+    setColor(CCOLOR_GREEN);
     // If it's a new game, initialize game data
     if (data.colonists == 0)
     {
@@ -360,9 +394,10 @@ int main()
         printf("\n> ");
         fgets(command, sizeof(command), stdin);
         command[strcspn(command, "\n")] = 0; // Remove newline
-
+        
         if (strcmp(command, "build house") == 0)
         {
+            cls();
             if (difftime(currentTime, lastBuiltHouse) >= COOLDOWN_BUILD_HOUSE)
             {
                 buildHouse(&data);
@@ -373,12 +408,16 @@ int main()
                 int remainingTime = (int)(COOLDOWN_BUILD_HOUSE - difftime(currentTime, lastBuiltHouse));
                 if (remainingTime > 0)
                 {
+                    setColor(CCOLOR_YELLOW);
                     printf("You must wait %d seconds before building another house.\n", remainingTime);
+                    setColor(CCOLOR_GREEN);
                 }
             }
         }
         else if (strcmp(command, "build townhouse") == 0)
         {
+            cls();
+
             if (difftime(currentTime, lastBuiltTownhouse) >= COOLDOWN_BUILD_TOWNHOUSE)
             {
                 buildTownhouse(&data);
@@ -389,20 +428,25 @@ int main()
                 int remainingTime = (int)(COOLDOWN_BUILD_HOUSE - difftime(currentTime, lastBuiltTownhouse));
                 if (remainingTime > 0)
                 {
+                    setColor(CCOLOR_YELLOW);
                     printf("You must wait %d seconds before building another townhouse.\n", remainingTime);
+                    setColor(CCOLOR_GREEN);
                 }
             }
         }
         else if (strcmp(command, "builder house") == 0)
         {
+            cls();
             builder(1, &data);
         }
         else if (strcmp(command, "builder townhouse") == 0)
         {
+            cls();
             builder(2, &data);
         }
         else if (strcmp(command, "gather") == 0)
         {
+            cls();
             if (difftime(currentTime, lastGather) >= COOLDOWN_GATHER)
             {
                 int gatheredWood = rand() % 31;
@@ -417,12 +461,15 @@ int main()
                 int remainingTime = (int)(COOLDOWN_BUILD_HOUSE - difftime(currentTime, lastGather));
                 if (remainingTime > 0)
                 {
+                    setColor(CCOLOR_YELLOW);
                     printf("You must wait %d seconds before gathering.\n", remainingTime);
+                    setColor(CCOLOR_GREEN);
                 }
             }
         }
         else if (strcmp(command, "randevent") == 0)
         {
+            cls();
             if (difftime(currentTime, lastRandevnt) >= COOLDOWN_RANDEVENT)
             {
                 randEvnt(&data);
@@ -433,35 +480,63 @@ int main()
                 int remainingTime = (int)(COOLDOWN_BUILD_HOUSE - difftime(currentTime, lastRandevnt));
                 if (remainingTime > 0)
                 {
+                    setColor(CCOLOR_YELLOW);
                     printf("You must wait %d seconds before having nature take its course.\n", remainingTime);
+                    setColor(CCOLOR_GREEN);
                 }
             }
         }
         else if (strcmp(command, "let nature") == 0)
         {
+            cls();
             autoRandEvent(&data);
         }
         else if (strcmp(command, "save") == 0)
         {
+            cls();
             saveGame(&data);
         }
         else if (strcmp(command, "quit") == 0)
         {
+            cls();
             saveGame(&data);
+            setColor(CCOLOR_YELLOW);
             printf("Goodbye!\n");
+            setColor(CCOLOR_RESET);
             break;
         }
         else if (strcmp(command, "help") == 0 || strcmp(command, "?") == 0)
         {
-            printf("You ask your assistant, Ferdiand, how \"play this game\"\n");
-            printf("He replies:\n\tbuild house\tbuild one house\n\tbuild townhouse\tbuild one townhouse\n\tgather\t\tgather wood and food\n\trandevent\tlet nature do one event\n\tlet nature\tlet nature run its course until you press \"q\"\n\tsave\t\tsave game\n\tquit\t\tquit\n");
+            cls();
+            setColor(CCOLOR_YELLOW);
+            printf("You ask your assistant, Ferdiand, how does one \"play this game\"\n");
+            printf("He replies:\n\tbuild house\t\tbuild one house\n\tbuild townhouse\t\tbuild one townhouse\n\tbuilder house\t\tauto build houses\n\tbuilder townhouse\tauto build townhouses\n\tgather\t\t\tgather wood and food\n\trandevent\t\tlet nature do one event\n\tlet nature\t\tlet nature run its course until you press \"q\"\n\tsave\t\t\tsave game\n\tquit\t\t\tquit\n");
+            setColor(CCOLOR_GREEN);
         }
         else
         {
+            cls();
+            setColor(CCOLOR_RED);
             printf("Unknown command.\n");
+            setColor(CCOLOR_GREEN);
+        }
+        
+        if (data.colonists <= 0)
+        {
+            setColor(CCOLOR_RED);
+            printf("Your colony has perished. You are left by yourself, and a pack of angry wolfes gather around you.");
+            Sleep(2000);
+            setColor(CCOLOR_CYAN);
+            printf(" ______     ______     __    __     ______        ______     __   __   ______     ______    \n");
+            printf("/\\  ___\\   /\\  __ \\   /\\ \"-./  \\   /\\  ___\\      /\\  __ \\   /\\ \\ / /  /\\  ___\\   /\\  == \\   \n");
+            printf("\\ \\ \\__ \\  \\ \\  __ \\  \\ \\ \\-./\\ \\  \\ \\  __\\      \\ \\ \\/\\ \\  \\ \\ \\'/   \\ \\  __\\   \\ \\  __<   \n");
+            printf(" \\ \\_____\\  \\ \\_\\ \\_\\  \\ \\_\\ \\ \\_\\  \\ \\_____\\     \\ \\_____\\  \\ \\__|    \\ \\_____\\  \\ \\_\\ \\_\\ \n");
+            printf("  \\/_____/   \\/_/\\/_/   \\/_/  \\/_/   \\/_____/      \\/_____/   \\/_/      \\/_____/   \\/_/ /_/ \n");
+            printf("\n");
+            setColor(CCOLOR_RESET);
         }
     }
 
     return 0;
 }
-// 450 lines of bullshit
+// 529 lines of bullshit
