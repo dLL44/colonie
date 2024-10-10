@@ -208,6 +208,29 @@ void autoRandEvent(struct UnsavedData *data)
     }
 }
 
+void autoLumber(struct UnsavedData *data)
+{
+    printf("Press 'q' to stop lumberjacking.\n");
+
+    while (1)
+    {
+        int gatheredWood = rand() % 100 + 25; // Randomly gather between 25 and 124 wood
+        data->wood += gatheredWood;
+        printf("You chopped %d wood.\n", gatheredWood);
+        Sleep(20000); // Wait for 20 seconds before gathering again
+
+        // Check for keyboard input
+        if (_kbhit())
+        {
+            char ch = _getch(); // Get the pressed key
+            if (ch == 'q')
+            {
+                printf("Stopped lumberjacking.\n");
+                break; // Exit the loop if 'q' is pressed
+            }
+        }
+    }
+}
 void buildHouse(struct UnsavedData *data)
 {
     if (data->wood >= 10)
@@ -467,6 +490,11 @@ int main()
                 }
             }
         }
+        else if (strcmp(command, "lumber") == 0)
+        {
+            cls();
+            autoLumber(&data);
+        }
         else if (strcmp(command, "randevent") == 0)
         {
             cls();
@@ -510,7 +538,7 @@ int main()
             cls();
             setColor(CCOLOR_YELLOW);
             printf("You ask your assistant, Ferdiand, how does one \"play this game\"\n");
-            printf("He replies:\n\tbuild house\t\tbuild one house\n\tbuild townhouse\t\tbuild one townhouse\n\tbuilder house\t\tauto build houses\n\tbuilder townhouse\tauto build townhouses\n\tgather\t\t\tgather wood and food\n\trandevent\t\tlet nature do one event\n\tlet nature\t\tlet nature run its course until you press \"q\"\n\tsave\t\t\tsave game\n\tquit\t\t\tquit\n");
+            printf("He replies:\n\tbuild house\t\tbuild one house\n\tbuild townhouse\t\tbuild one townhouse\n\tbuilder house\t\tauto build houses\n\tbuilder townhouse\tauto build townhouses\n\tgather\t\t\tgather wood and food\n\tlumber\t\t\tstart lumberjacking (high wood output, more time)\n\trandevent\t\tlet nature do one event\n\tlet nature\t\tlet nature run its course until you press \"q\"\n\tsave\t\t\tsave game\n\tquit\t\t\tquit\n");
             setColor(CCOLOR_GREEN);
         }
         else
@@ -539,4 +567,4 @@ int main()
 
     return 0;
 }
-// 529 lines of bullshit
+// 569 lines of bullshit
